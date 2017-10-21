@@ -118,12 +118,12 @@ public class ChooseAreaFragment extends Fragment {
         provinceList= DataSupport.findAll(Province.class);//从省份数据库中查找所有数据，并赋值给省份集合
         if (provinceList.size()>0){//如果省份集合不为空，就遍历这个集合
             dataList.clear();
-            for(Province province:provinceList){
+            for(Province province : provinceList){
                 dataList.add(province.getProvinceName());//添加将要显示在ListView中的数据
             }
             adapter.notifyDataSetChanged();//通知适配器数据发生变化，进行更新
             listView.setSelection(0);//将ListView显示到第一条
-            currentLevel=LEVEL_PROVINCE;//将现在的级别设置到省份级别
+            currentLevel = LEVEL_PROVINCE;//将现在的级别设置到省份级别
         }else{//数据库中查询不在数据，请求网络数据
             String address="http://guolin.tech/api/china";
             queryFromServer(address,"province");
@@ -174,7 +174,7 @@ public class ChooseAreaFragment extends Fragment {
         }else{
             int provinceCode=selectedProvince.getProvinceCode();//选择省份id
             int cityCode=selectedCity.getCityCode();//选择城市id
-            String address="http://guolin.tech/api/china/"+provinceCode+cityCode;//根据省份以及城市访问服务器数据
+            String address="http://guolin.tech/api/china/"+provinceCode+"/"+cityCode;//根据省份以及城市访问服务器数据
             queryFromServer(address,"county");
         }
     }
@@ -187,23 +187,11 @@ public class ChooseAreaFragment extends Fragment {
         showProgressDialog();//显示进度条
         HttpUtil.sendOkHttpRequest(address, new Callback() {//调用访问网络工具类
             @Override
-            public void onFailure(Call call, IOException e) {
-                /*回调方法都是在子线程中运行的，通过getActivity().runOnUiThread()方法回到主线程处理UI逻辑*/
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        closeProgressDialog();
-                        Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String responseText=response.body().toString();//服务器返回的数据
+                final String responseText=response.body().string();//服务器返回的数据
                 boolean result=false;
                 if ("province".equals(type)){//根据访问类型进行数据解析
-                    result= Utility.handleProvinceResponse(responseText);//调用解析省份数据的方法
+                   result= Utility.handleProvinceResponse(responseText);//调用解析省份数据的方法
                 }else if ("city".equals(type)){
                     result=Utility.handleCityResponse(responseText,selectedProvince.getId());
                 }else if("county".equals(type)){
@@ -224,6 +212,18 @@ public class ChooseAreaFragment extends Fragment {
                         }
                     });
                 }
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                /*回调方法都是在子线程中运行的，通过getActivity().runOnUiThread()方法回到主线程处理UI逻辑*/
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        closeProgressDialog();
+                        Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

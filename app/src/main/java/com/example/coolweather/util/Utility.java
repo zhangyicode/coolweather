@@ -14,6 +14,7 @@ import org.json.JSONObject;
  * Created by Administrator on 2017/10/19 0019.
  */
 
+
 public class Utility {//解析服务器返回JSON格式数据的工具类
 
     /*
@@ -72,7 +73,7 @@ public class Utility {//解析服务器返回JSON格式数据的工具类
                     JSONObject countyObject=allCounties.getJSONObject(i);
                     County county=new County();
                     county.setCountyName(countyObject.getString("name"));
-                    county.setCountyName(countyObject.getString("weather_id"));
+                    county.setWeatherId(countyObject.getString("weather_id"));
                     county.setCityId(cityId);
                     county.save();
                 }
