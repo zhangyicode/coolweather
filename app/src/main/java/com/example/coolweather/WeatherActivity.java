@@ -10,7 +10,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -148,14 +147,14 @@ public class WeatherActivity extends AppCompatActivity {
     /*
     根据天气ID请求城市天气信息
      */
-    public void requestWeather(String weatherId){
+    public void requestWeather(final String weatherId){
        //    String weatherUrl=   "http://guolin.tech/api/weather?cityid=CN101190401&key=2981f295a42f43ea9f0c9d5ab6f657fa";
         String weatherUrl="http://guolin.tech/api/weather?cityid="+ weatherId +"&key=2981f295a42f43ea9f0c9d5ab6f657fa";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {//根据天气ID访问服务器数据
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText=response.body().string();
-                Log.d("zhangyi",responseText);
+                //Log.d("zhangyi",responseText);
                 final Weather weather= Utility.handlerWeatherResponse(responseText);//将服务器数据通过GSON类实例成对象
                 runOnUiThread(new Runnable() {//切换到主线程
                     @Override
@@ -165,6 +164,7 @@ public class WeatherActivity extends AppCompatActivity {
                                     getDefaultSharedPreferences(WeatherActivity.this).edit();//获取Editor对象
                             editor.putString("weather",responseText);//将服务器返回的数据以键值对的方式存储
                             editor.apply();
+                            mWeatherId=weather.basic.weatherId;//将最后一期请求的天气ID设置为当前ID，就能解决修改城市之后的刷新问题了
                             showWeatherInfo(weather);//显示界面
                         }else{
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_LONG).show();
