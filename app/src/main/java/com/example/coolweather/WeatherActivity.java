@@ -205,11 +205,25 @@ public class WeatherActivity extends AppCompatActivity {
         for(Forecast forecast:weather.forecastList){
             View view= LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);//动态加载布局文件
             TextView dateText=(TextView)view.findViewById(R.id.date_text);
-            TextView infoText=(TextView)view.findViewById(R.id.info_text);
+            ImageView icon=(ImageView)view.findViewById(R.id.forecast_icon);
+            //TextView infoText=(TextView)view.findViewById(R.id.info_text);//天气详情
             TextView maxText=(TextView)view.findViewById(R.id.max_text);
             TextView minText=(TextView)view.findViewById(R.id.min_text);
             dateText.setText(forecast.date);
-            infoText.setText(forecast.more.info);
+            if("多云".equals(forecast.more.info)){     //将天气详情修改成图标显示
+               icon.setImageResource(R.drawable.duoyun);
+            }else if("阴".equals(forecast.more.info)){
+                icon.setImageResource(R.drawable.yin);
+            }else if("晴".equals(forecast.more.info)){
+                icon.setImageResource(R.drawable.qing);
+            }else if("大雨".equals(forecast.more.info)){
+                icon.setImageResource(R.drawable.dayu);
+            }else if("小雨".equals(forecast.more.info)){
+                icon.setImageResource(R.drawable.xiaoyu);
+            }else if("中雨".equals(forecast.more.info)){
+                icon.setImageResource(R.drawable.zhongyu);
+            }
+            //infoText.setText(forecast.more.info);
             maxText.setText(forecast.temperature.max);
             minText.setText(forecast.temperature.min);
             forecastLayout.addView(view);//
