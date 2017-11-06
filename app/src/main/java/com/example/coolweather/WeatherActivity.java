@@ -42,9 +42,10 @@ public class WeatherActivity extends AppCompatActivity {
 
     private TextView aqiText,pm25Text,comfortText,carwashText,sportText;
 
-    private ImageView bingPicImg;
+    private ImageView bingPicImg,now_image;
 
     public SwipeRefreshLayout swipeRefresh;//刷新控件
+
     private String mWeatherId;
 
     public DrawerLayout drawerLayout;
@@ -148,13 +149,11 @@ public class WeatherActivity extends AppCompatActivity {
     根据天气ID请求城市天气信息
      */
     public void requestWeather(final String weatherId){
-       //    String weatherUrl=   "http://guolin.tech/api/weather?cityid=CN101190401&key=2981f295a42f43ea9f0c9d5ab6f657fa";
         String weatherUrl="http://guolin.tech/api/weather?cityid="+ weatherId +"&key=2981f295a42f43ea9f0c9d5ab6f657fa";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {//根据天气ID访问服务器数据
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText=response.body().string();
-                //Log.d("zhangyi",responseText);
                 final Weather weather= Utility.handlerWeatherResponse(responseText);//将服务器数据通过GSON类实例成对象
                 runOnUiThread(new Runnable() {//切换到主线程
                     @Override
@@ -198,9 +197,11 @@ public class WeatherActivity extends AppCompatActivity {
         String degree=weather.now.temperature+"℃";
         String weatherInfo=weather.now.more.info;
         titleCity.setText(cityName);
-        titleUpdateTime.setText(updateTime);
+        titleUpdateTime.setText("Updated："+updateTime);
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
+        now_image=(ImageView)findViewById(R.id.now_image);
+        showImage(now_image,weatherInfo);
         forecastLayout.removeAllViews();//移除已有的控件，动态加载控件时要先调用该方法。
         for(Forecast forecast:weather.forecastList){
             View view= LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);//动态加载布局文件
@@ -210,19 +211,7 @@ public class WeatherActivity extends AppCompatActivity {
             TextView maxText=(TextView)view.findViewById(R.id.max_text);
             TextView minText=(TextView)view.findViewById(R.id.min_text);
             dateText.setText(forecast.date);
-            if("多云".equals(forecast.more.info)){     //将天气详情修改成图标显示
-               icon.setImageResource(R.drawable.duoyun);
-            }else if("阴".equals(forecast.more.info)){
-                icon.setImageResource(R.drawable.yin);
-            }else if("晴".equals(forecast.more.info)){
-                icon.setImageResource(R.drawable.qing);
-            }else if("大雨".equals(forecast.more.info)){
-                icon.setImageResource(R.drawable.dayu);
-            }else if("小雨".equals(forecast.more.info)){
-                icon.setImageResource(R.drawable.xiaoyu);
-            }else if("中雨".equals(forecast.more.info)){
-                icon.setImageResource(R.drawable.zhongyu);
-            }
+            showImage(icon,forecast.more.info);
             //infoText.setText(forecast.more.info);
             maxText.setText(forecast.temperature.max);
             minText.setText(forecast.temperature.min);
@@ -242,5 +231,36 @@ public class WeatherActivity extends AppCompatActivity {
         //开启后台刷新服务
         Intent intent=new Intent(this, AutoUpdateService.class);
         startService(intent);
+    }
+
+    private void showImage(ImageView imageView,String weatherInfo){//根据天气详情显示相应图标
+        switch(weatherInfo){
+            case "多云":
+                imageView.setImageResource(R.drawable.duoyun);
+                break;
+            case "阴":
+                imageView.setImageResource(R.drawable.yin);
+                break;
+            case "晴":
+                imageView.setImageResource(R.drawable.qing);
+                break;
+            case "大雨":
+                imageView.setImageResource(R.drawable.dayu);
+                break;
+            case "小雨":
+                imageView.setImageResource(R.drawable.xiaoyu);
+                break;
+            case "中雨":
+                imageView.setImageResource(R.drawable.zhongyu);
+                break;
+            case "阵雨":
+                imageView.setImageResource(R.drawable.zhenyu);
+                break;
+            case "晴间多云":
+                imageView.setImageResource(R.drawable.qingjianduoyun);
+                break;
+            default:
+                break;
+        }
     }
 }
